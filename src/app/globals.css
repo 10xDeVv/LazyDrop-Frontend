@@ -17,6 +17,7 @@
   --font-geist-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono";
 }
 
+
 /* Base */
 @layer base {
   html, body { height: 100%; }
@@ -25,6 +26,50 @@
      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif !important;
     -webkit-font-smoothing: antialiased;
     line-height: 1.5;
+  }
+}
+
+/* Animated Glowing Border */
+/* Animated Glowing Border with Frosted Glass */
+/* Animated Glowing Border - SIMPLE */
+/* Animated Glowing Border - SIMPLE */
+/* Animated Glowing Border - FIXED */
+/* Animated Glowing Border - FIXED WITH GLASSMORPHISM */
+.glow-border-animated {
+  position: relative;
+  border: 2px solid transparent;
+  background: transparent; /* Changed from rgba(0, 0, 0, 0.5) */
+  background-clip: padding-box;
+}
+
+.glow-border-animated::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(90deg,
+  #00ff88 0%,
+  #00dddd 25%,
+  #00ff88 50%,
+  #00dddd 75%,
+  #00ff88 100%);
+  background-size: 200% 100%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: borderGlow 3s linear infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes borderGlow {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 200% 0%;
   }
 }
 
@@ -57,6 +102,17 @@
   100% { background-position: 100% 50%; }
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @layer utilities {
   .text-metal {
     background-image: linear-gradient(
@@ -68,7 +124,7 @@
       #ebebeb 82%,
       #bdbdbd 100%
     );
-    background-size: 200% 100%; 
+    background-size: 200% 100%;
     background-position: 0% 50%;
     -webkit-background-clip: text;
     background-clip: text;
@@ -76,3 +132,4 @@
     color: transparent;
   }
 }
+

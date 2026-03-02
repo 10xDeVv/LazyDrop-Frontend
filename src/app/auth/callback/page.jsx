@@ -1,0 +1,11 @@
+// app/auth/callback/page.jsx
+import { Suspense } from "react";
+import CallbackClient from "./CallbackClient";
+
+export default function AuthCallbackPage() {
+    return (
+        <Suspense fallback={null}>
+            <CallbackClient />
+        </Suspense>
+    );
+}
