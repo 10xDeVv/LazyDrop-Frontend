@@ -1,4 +1,3 @@
-// app/checkout/success/page.jsx
 import { Suspense } from "react";
 import CheckoutSuccessClient from "./CheckoutSuccessClient";
 

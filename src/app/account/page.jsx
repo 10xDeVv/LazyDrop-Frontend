@@ -1,4 +1,3 @@
-// app/account/page.jsx
 import { Suspense } from "react";
 import AccountClient from "./AccountClient";
 

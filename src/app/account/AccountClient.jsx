@@ -1,4 +1,3 @@
-// app/account/AccountClient.jsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -20,7 +19,6 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 
-// --- FONTS & TOKENS ---
 const heading = Space_Grotesk({ subsets: ["latin"], weight: ["500", "600", "700"], display: "swap" });
 const body = Inter({ subsets: ["latin"], weight: ["400", "500", "600"], display: "swap" });
 const mono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], display: "swap" });

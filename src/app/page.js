@@ -33,7 +33,6 @@ import { Space_Grotesk, Inter } from "next/font/google";
 const heading = Space_Grotesk({ subsets: ["latin"], weight: ["500", "600", "700"], display: "swap" });
 const body = Inter({ subsets: ["latin"], weight: ["400", "500", "600"], display: "swap" });
 
-// ---- Tokens
 const TOKENS = {
     bg: "#0E0F12",
     panel: "#16181D",
@@ -47,7 +46,6 @@ const TOKENS = {
     cyan: "rgba(93,224,255,0.85)",
 };
 
-// ---------- Typewriter code
 function TypewriterCode() {
     const codes = useMemo(() => ["LD-482-019", "LD-905-771", "LD-112-604", "LD-738-255"], []);
     const [displayed, setDisplayed] = useState("");
@@ -87,7 +85,6 @@ function TypewriterCode() {
     );
 }
 
-// ---------- Rotating circle with Down Arrow
 function ScrollDownSpinner() {
     return (
         <div className="relative w-32 h-32 flex items-center justify-center cursor-pointer group">
@@ -107,7 +104,6 @@ function ScrollDownSpinner() {
                 </svg>
             </div>
 
-            {/* The Arrow Center */}
             <div
                 className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110"
                 style={{ background: TOKENS.lime, boxShadow: `0 0 20px ${TOKENS.lime}40` }}
@@ -118,11 +114,9 @@ function ScrollDownSpinner() {
     );
 }
 
-// ---------- Session Visual (FIXED: Bigger QR + Working Glow)
 function SessionVisual() {
     return (
         <div className="relative group">
-            {/* Background Glows */}
             <div className="absolute -top-16 -right-10 w-72 h-72 rounded-full blur-3xl opacity-35" style={{ background: `radial-gradient(circle, ${TOKENS.lime} 0%, transparent 60%)` }} />
             <div className="absolute -bottom-16 -left-10 w-72 h-72 rounded-full blur-3xl opacity-25" style={{ background: `radial-gradient(circle, ${TOKENS.cyan} 0%, transparent 60%)` }} />
 
@@ -133,7 +127,6 @@ function SessionVisual() {
                     background: `linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03))`,
                 }}
             >
-                {/* Top Bar */}
                 <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: TOKENS.line }}>
                     <div className="flex items-center gap-3">
                         <div className="w-2.5 h-2.5 rounded-full shadow-[0_0_10px_currentColor] animate-pulse" style={{ background: TOKENS.lime, color: TOKENS.lime }} />
@@ -145,10 +138,8 @@ function SessionVisual() {
                     </div>
                 </div>
 
-                {/* Content */}
                 <div className="p-6 md:p-8 space-y-8">
 
-                    {/* Header Row: Code & QR */}
                     <div className="flex justify-between items-start gap-4">
                         <div className="flex-1">
                             <p className="text-xs uppercase tracking-widest mb-3 font-semibold" style={{ color: TOKENS.dim }}>Connection Key</p>
@@ -800,9 +791,6 @@ function Footer() {
                 {/* Bottom Bar */}
                 <div className="pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-600">
                     <p>© 2026 LazyDrop. All rights reserved.</p>
-                    <p className="flex items-center gap-1">
-                        Crafted in Canada 🇨🇦
-                    </p>
                 </div>
             </div>
         </footer>
