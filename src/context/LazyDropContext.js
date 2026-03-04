@@ -11,7 +11,6 @@ import React, {
 
 import { api } from "@/lib/api";
 import { WebSocketService } from "@/lib/websocket";
-import { CheckCircle, XCircle, Info } from "lucide-react";
 import {useRouter} from "next/navigation";
 import ToastContainer from "@/components/Toast";
 
@@ -30,94 +29,6 @@ class EventBus {
     (this.events[event] || []).forEach((cb) => cb(data));
   }
 }
-
-const ToastCtx = createContext(null);
-
-function Toasts({ toasts, onAction }) {
-    return (
-        <div
-            id="toastContainer"
-            aria-live="polite"
-            aria-atomic="true"
-            className="fixed top-24 right-4 sm:right-8 z-[3000] flex flex-col gap-3 pointer-events-none"
-        >
-            {toasts.map((t) => (
-                <div
-                    key={t.id}
-                    className={`
-            pointer-events-auto flex items-center gap-3 p-4 min-w-[300px] max-w-sm
-            bg-[#16181D]/90 backdrop-blur-md border rounded-xl shadow-2xl
-            animate-in slide-in-from-right duration-300
-          `}
-                    style={{
-                        borderColor:
-                            t.type === "success"
-                                ? "rgba(223, 255, 0, 0.3)"
-                                : t.type === "error"
-                                    ? "rgba(239, 68, 68, 0.3)"
-                                    : "rgba(255, 255, 255, 0.1)",
-                    }}
-                >
-                    <div
-                        className={`
-              shrink-0 w-8 h-8 rounded-full flex items-center justify-center
-              ${
-                            t.type === "success"
-                                ? "bg-[#DFFF00]/10 text-[#DFFF00]"
-                                : t.type === "error"
-                                    ? "bg-red-500/10 text-red-500"
-                                    : "bg-white/10 text-white"
-                        }
-            `}
-                    >
-                        {t.type === "success" && <CheckCircle size={16} />}
-                        {t.type === "error" && <XCircle size={16} />}
-                        {t.type === "info" && <Info size={16} />}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                        <p
-                            className={`text-sm font-bold ${
-                                t.type === "success"
-                                    ? "text-[#DFFF00]"
-                                    : t.type === "error"
-                                        ? "text-red-400"
-                                        : "text-white"
-                            }`}
-                        >
-                            {t.type === "success" ? "Success" : t.type === "error" ? "Error" : "Info"}
-                        </p>
-
-                        <p className="text-sm text-gray-400 mt-0.5 break-words">{t.message}</p>
-
-                        {/* ✅ Action Button */}
-                        {t.action?.label && (
-                            <div className="mt-2">
-                                <button
-                                    onClick={() => onAction?.(t)}
-                                    className={`
-                    inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-xs font-bold
-                    border transition
-                    ${
-                                        t.type === "error"
-                                            ? "border-red-500/30 bg-red-500/10 text-red-200 hover:bg-red-500/20"
-                                            : "border-white/10 bg-white/5 text-white hover:bg-white/10"
-                                    }
-                  `}
-                                >
-                                    {t.action.label}
-                                </button>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-transparent via-white/20 to-transparent w-full opacity-50" />
-                </div>
-            ))}
-        </div>
-    );
-}
-
 
 const AppCtx = createContext(null);
 export function useApp() {
@@ -143,6 +54,7 @@ export default function InstantShareProvider({ children }) {
     const [notes, setNotes] = useState([]);
     const [timeLeft, setTimeLeft] = useState(600);
     const [isConnected, setIsConnected] = useState(false);
+    const [isConnecting, setIsConnecting] = useState(false);
     const [loading, setLoading] = useState(false);
 
     // Refs
@@ -170,7 +82,6 @@ export default function InstantShareProvider({ children }) {
     };
 
   // ---------- toast ----------
-    // ---------- toast ----------
     const [toasts, setToasts] = useState([]);
 
     const removeToast = useCallback((id) => {
@@ -637,6 +548,7 @@ export default function InstantShareProvider({ children }) {
             };
 
             setLoading(true);
+            setIsConnecting(true);
             setIsGuest(false);
 
             // A. Resolve
@@ -698,10 +610,12 @@ export default function InstantShareProvider({ children }) {
             connectWebSocket(sessionData.id);
             // ... timer logic ...
 
+            setIsConnecting(false);
             return true;
         } catch (err) {
             console.error(err);
             setLoading(false);
+            setIsConnecting(false);
             setCurrentSession(null);
 
             if (err?.status === 403) {
@@ -713,6 +627,7 @@ export default function InstantShareProvider({ children }) {
             }
         } finally {
             setLoading(false);
+            setIsConnecting(false);
         }
     }, [connectWebSocket, isGuest, showToast]);
 
@@ -826,7 +741,7 @@ export default function InstantShareProvider({ children }) {
           setFiles((prev) => [...prev, localFileObj]);
 
           try {
-            // ✅ Upload through backend proxy (avoids Spaces CORS)
+            // Upload via signed URL directly to DO Spaces (no backend proxy)
             const meta = await api.uploadFile(currentSession.id, file, {
               onProgress: (progress) => {
                 setFiles((prev) =>
@@ -1024,6 +939,7 @@ export default function InstantShareProvider({ children }) {
         timeLeft,
         files,
         isConnected,
+          isConnecting,
           isGuest,
           isOwner: myRole === "OWNER",
         loading,
@@ -1047,7 +963,7 @@ export default function InstantShareProvider({ children }) {
         bus: busRef.current,
         showToast,
       }),
-      [currentSession, myParticipantId, autoDownload, timeLeft, files, isConnected, isGuest, myRole, loading, formatTime, formatFileSize, createPairing, sendSessionNote, joinSessionSequence, participants, hasPeer, notes, processFiles, downloadFile, downloadAllFiles, queueFiles, flushQueuedFiles, toggleAutoDownload, leaveRoom, endSessionForEveryone, resetSession, showToast]
+      [currentSession, myParticipantId, autoDownload, timeLeft, files, isConnected, isConnecting, isGuest, myRole, loading, formatTime, formatFileSize, createPairing, sendSessionNote, joinSessionSequence, participants, hasPeer, notes, processFiles, downloadFile, downloadAllFiles, queueFiles, flushQueuedFiles, toggleAutoDownload, leaveRoom, endSessionForEveryone, resetSession, showToast]
   );
 
   return (

@@ -6,7 +6,8 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import { motion } from "framer-motion";
-import { Mail, Lock, ArrowLeft, AlertCircle, Loader2, Zap } from "lucide-react";
+import Image from "next/image";
+import { Mail, Lock, ArrowLeft, AlertCircle, Loader2 } from "lucide-react";
 import { Space_Grotesk, Inter } from "next/font/google";
 
 // --- FONTS & TOKENS ---
@@ -95,8 +96,8 @@ export default function LoginClient() {
 
                     {/* Header */}
                     <div className="text-center mb-10">
-                        <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#DFFF00] text-black mb-6 shadow-[0_0_20px_rgba(223,255,0,0.3)]">
-                            <Zap size={24} fill="black" />
+                        <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-6 shadow-[0_0_20px_rgba(223,255,0,0.3)]">
+                            <Image src="/logo.png" alt="LazyDrop" width={28} height={28} />
                         </div>
                         <h1 className={`${heading.className} text-3xl font-bold mb-2`}>Welcome back</h1>
                         <p className="text-gray-400">Log in to sync sessions across devices.</p>

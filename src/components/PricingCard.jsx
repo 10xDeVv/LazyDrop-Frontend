@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Check, Crown, Loader2 } from "lucide-react";
 import { Space_Grotesk, Inter } from "next/font/google";
 
@@ -83,9 +82,12 @@ export default function PricingCard({ plan, loading, onCheckout, isCurrent, isPa
                         <Check size={20} /> Current Plan
                     </button>
                 ) : plan.price === "0" ? (
-                    <Link href="/drop" className="block w-full py-5 rounded-2xl border border-white/20 text-white hover:bg-white hover:text-black font-bold text-lg text-center transition-all">
-                        Start Dropping
-                    </Link>
+                    <button
+                        onClick={onCheckout}
+                        className="w-full py-5 rounded-2xl border border-white/20 text-white hover:bg-white hover:text-black font-bold text-lg text-center transition-all"
+                    >
+                        {plan.cta || "Start Dropping"}
+                    </button>
                 ) : (
                     <button
                         onClick={onCheckout}

@@ -11,7 +11,7 @@ describe('ApiService', () => {
     global.fetch = mockFetch;
 
     apiService = new ApiService({
-      baseUrl: 'http://localhost:8080/api/v1',
+      baseUrl: 'http://localhost:8080',
       getAccessToken: async () => 'test_token_123'
     });
   });
@@ -30,7 +30,7 @@ describe('ApiService', () => {
 
       expect(result).toEqual(mockResponse);
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('/api/v1/test'),
+        expect.stringContaining('/test'),
         expect.any(Object)
       );
     });
@@ -120,7 +120,7 @@ describe('ApiService', () => {
 
     it('should handle timeout', async () => {
       const shortTimeoutService = new ApiService({
-        baseUrl: 'http://localhost:8080/api/v1',
+        baseUrl: 'http://localhost:8080',
         getAccessToken: async () => 'test_token_123'
       });
 

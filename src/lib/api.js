@@ -1,6 +1,6 @@
 import { getSupabaseAccessToken } from "@/lib/auth-token";
 
-const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1");
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080");
 
 export class ApiError extends Error {
     constructor(message, { status, code, details, url } = {}) {
@@ -190,48 +190,63 @@ export class ApiService {
         });
     }
 
-    /** Upload file through the backend (proxied to Spaces — avoids bucket CORS). */
-    uploadFile(sessionId, file, { onProgress } = {}) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                const formData = new FormData();
-                formData.append("file", file);
-
-                let accessToken = null;
-                if (typeof this.getAccessToken === "function") {
-                    accessToken = await this.getAccessToken();
-                }
-
-                const xhr = new XMLHttpRequest();
-
-                if (onProgress) {
-                    xhr.upload.addEventListener("progress", (e) => {
-                        if (e.lengthComputable) onProgress(e.loaded / e.total * 100);
-                    });
-                }
-
-                xhr.addEventListener("load", () => {
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        try { resolve(JSON.parse(xhr.responseText)); }
-                        catch { resolve(null); }
-                    } else {
-                        reject(new ApiError(`Upload failed (${xhr.status})`, { status: xhr.status }));
-                    }
-                });
-
-                xhr.addEventListener("error", () => {
-                    reject(new ApiError("Upload network error", { status: 0 }));
-                });
-
-                const url = `${this.baseUrl}/sessions/${sessionId}/files/upload`;
-                xhr.open("POST", url);
-                xhr.withCredentials = true;
-                if (accessToken) xhr.setRequestHeader("Authorization", `Bearer ${accessToken}`);
-                xhr.send(formData);
-            } catch (err) {
-                reject(err);
-            }
+    /**
+     * Two-phase signed URL upload: browser uploads directly to DO Spaces.
+     * 1. Request a signed upload URL from backend (tiny JSON request)
+     * 2. PUT the file directly to the signed URL (browser → S3, no backend proxy)
+     * 3. Confirm the upload with backend (tiny JSON request)
+     *
+     * The backend never touches file bytes — only metadata.
+     */
+    async uploadFile(sessionId, file, { onProgress } = {}) {
+        // Phase 1: Get signed URL + object path from backend
+        const { signedUrl, objectPath } = await this.requestUpload(sessionId, {
+            fileName: file.name,
+            contentType: file.type || "application/octet-stream",
+            fileSize: file.size,
         });
+
+        if (!signedUrl || !objectPath) {
+            throw new ApiError("Backend did not return a signed upload URL", { status: 500 });
+        }
+
+        // Phase 2: PUT file directly to DO Spaces via signed URL
+        await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+
+            if (onProgress) {
+                xhr.upload.addEventListener("progress", (e) => {
+                    if (e.lengthComputable) onProgress((e.loaded / e.total) * 95); // Reserve last 5% for confirm
+                });
+            }
+
+            xhr.addEventListener("load", () => {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    resolve();
+                } else {
+                    reject(new ApiError(`Direct upload to storage failed (${xhr.status})`, { status: xhr.status }));
+                }
+            });
+
+            xhr.addEventListener("error", () => {
+                reject(new ApiError("Upload network error", { status: 0 }));
+            });
+
+            xhr.open("PUT", signedUrl);
+            xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+            xhr.send(file);
+        });
+
+        // Phase 3: Confirm upload with backend (writes DB row + broadcasts WS event)
+        const confirmed = await this.confirmUpload(sessionId, {
+            objectPath,
+            originalName: file.name,
+            sizeBytes: file.size,
+        });
+
+        if (onProgress) onProgress(100);
+
+        return confirmed;
     }
 
     confirmUpload(sessionId, body) {
@@ -289,7 +304,7 @@ export class ApiService {
 
 // POST /subscriptions/checkout
 // Returns CheckoutResponse { sessionId, url }
-    async createCheckoutSession(plan = "plus") {
+    async createCheckoutSession(plan = "PLUS") {
         const res = await this.request("/subscriptions/checkout", {
             method: "POST",
             body: { plan },

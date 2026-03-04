@@ -11,31 +11,34 @@ export const PLANS = {
         priceId: null,
         features: {
             maxFileSize: 100 * 1024 * 1024, // 100MB
-            sessionDuration: 10 * 60, // 10 minutes
-            transferHistory: false,
+            sessionDuration: 120 * 60, // 120 minutes
+            maxFilesPerSession: 5,
+            transferHistory: true,
             passwordProtection: false,
             prioritySpeed: false,
         },
     },
     PLUS: {
         name: 'Plus',
-        price: 4.99,
-        priceId: process.env.STRIPE_PLUS_PRICE_ID, // You'll create this in Stripe Dashboard
+        price: 9.99,
+        priceId: process.env.STRIPE_PLUS_PRICE_ID,
         features: {
-            maxFileSize: 2 * 1024 * 1024 * 1024, // 2GB
-            sessionDuration: 120 * 60, // 2 hours
+            maxFileSize: 1024 * 1024 * 1024, // 1GB
+            sessionDuration: 120 * 60, // 120 minutes
+            maxFilesPerSession: 50,
             transferHistory: true,
             passwordProtection: true,
             prioritySpeed: true,
         },
     },
     PRO: {
-        name: 'PRO',
-        price: 4.99,
-        priceId: process.env.STRIPE_PRO_PRICE_ID, // You'll create this in Stripe Dashboard
+        name: 'Pro',
+        price: 19.99,
+        priceId: process.env.STRIPE_PRO_PRICE_ID,
         features: {
             maxFileSize: 2 * 1024 * 1024 * 1024, // 2GB
-            sessionDuration: 120 * 60, // 2 hours
+            sessionDuration: 120 * 60, // 120 minutes
+            maxFilesPerSession: 75,
             transferHistory: true,
             passwordProtection: true,
             prioritySpeed: true,

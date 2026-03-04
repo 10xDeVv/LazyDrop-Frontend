@@ -4,6 +4,7 @@ import "./globals.css";
 import InstantShareProvider from "../context/LazyDropContext";
 import SessionExpiredOverlay from "../components/SessionExpiredOverlay";
 import { UserProvider } from "@/context/UserContext";
+import { Analytics } from "@vercel/analytics/react";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -32,6 +33,7 @@ export default function RootLayout({ children }) {
                 </SessionExpiredOverlay>
             </InstantShareProvider>
         </UserProvider>
+        <Analytics />
         </body>
         </html>
     );

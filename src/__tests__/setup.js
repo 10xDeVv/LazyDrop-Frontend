@@ -6,7 +6,7 @@ global.process = {
   env: {
     NEXT_PUBLIC_SUPABASE_URL: 'https://test.supabase.co',
     NEXT_PUBLIC_SUPABASE_ANON_KEY: 'test_key',
-    NEXT_PUBLIC_API_URL: 'http://localhost:8080/api/v1',
+    NEXT_PUBLIC_API_URL: 'http://localhost:8080',
   }
 };
 
